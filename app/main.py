@@ -9,9 +9,16 @@ def main():
     # Uncomment this to pass the first stage
     
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
-    server_socket.accept() # wait for client
+    
+    while True:
+        client_socket, client_address = server_socket.accept()
+        print(f"Accepted connection from {client_address}")
 
-    server_socket.send(b"HTTP/1.1 200 OK\r\n\r\n")
+        request = client_socket.recv(1024).decode("utf-8")
+        print(f"Received request: {request}")
+
+        client_socket.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
+        client_socket.close()
 
 
 if __name__ == "__main__":
