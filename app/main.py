@@ -40,8 +40,9 @@ def handle_request(request):
         return OK_STATUS + content_type + content_length + CRLF + user_agent
     elif path.startswith("/files/"):
         file_name = path.split("/files/")[1] or ""
+        file_path = os.path.join("/tmp/data/codecrafters.io/http-server-tester", file_name)
         try: 
-            with open(f"/tmp/{file_name}") as file:
+            with open(file_path) as file:
                 file_content = file.read()
         except FileNotFoundError:
             return NOT_FOUND_STATUS
@@ -72,7 +73,7 @@ def main():
     
     while True:
         client_socket, client_address = server_socket.accept()
-        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
+        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address), daemon=True)
         client_thread.start()
 
 
