@@ -4,6 +4,7 @@ import os
 import argparse
 
 OK_STATUS = "HTTP/1.1 200 OK\r\n"
+CREATED_STATUS = "HTTP/1.1 201 Created\r\n"
 NOT_FOUND_STATUS = "HTTP/1.1 404 Not Found\r\n\r\n"
 CRLF = "\r\n"
 
@@ -37,6 +38,7 @@ def handle_request(request):
     
     headers = parse_headers(request)
 
+    method = request.split(" ")[0]
     path = request.split(" ")[1]
     if path == "/":
         return OK_STATUS + "\r\n"
@@ -56,6 +58,12 @@ def handle_request(request):
         file_name = path.split("/files/")[1] or ""
         file_path = os.path.join(FILE_DIRECTORY, file_name)
 
+        if method == "POST":
+            with open(file_path, "w") as file:
+                file.write(request.split("\r\n\r\n")[1])
+
+            return CREATED_STATUS
+        
         if not os.path.exists(file_path):
             return NOT_FOUND_STATUS
         
