@@ -36,24 +36,31 @@ def handle_request(request):
     if len(lines) == 0:
         return NOT_FOUND_STATUS
     
-    headers = parse_headers(request)
+    request_headers = parse_headers(request)
 
     method = request.split(" ")[0]
     path = request.split(" ")[1]
     if path == "/":
         return OK_STATUS + "\r\n"
+    
     elif path.startswith("/echo"):
         echo = path.split("/echo/")[1] if "/echo/" in path else ""
         content_type = "Content-Type: text/plain\r\n"
         content_length = f"Content-Length: {len(path.split("/echo/")[1])}\r\n"
+        content_encoding = ""
 
-        return OK_STATUS + content_type + content_length + CRLF + echo
+        if (request_headers.get("Accept-Encoding", "")).startswith("gzip"):
+            content_encoding = "Content-Encoding: gzip\r\n"
+
+        return OK_STATUS + content_encoding + content_type + content_length + CRLF + echo
+    
     elif path == "/user-agent":
-        user_agent = headers.get("User-Agent", "")
+        user_agent = request_headers.get("User-Agent", "")
         content_type = "Content-Type: text/plain\r\n"
         content_length = f"Content-Length: {len(user_agent)}\r\n"
 
         return OK_STATUS + content_type + content_length + CRLF + user_agent
+    
     elif path.startswith("/files/"):
         file_name = path.split("/files/")[1] or ""
         file_path = os.path.join(FILE_DIRECTORY, file_name)
@@ -77,6 +84,7 @@ def handle_request(request):
         content_type = "Content-Type: application/octet-stream\r\n"
 
         return OK_STATUS + content_type + content_length + CRLF + file_content
+    
     else:
         return NOT_FOUND_STATUS
     
