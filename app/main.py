@@ -4,7 +4,7 @@ import os
 import argparse
 
 OK_STATUS = "HTTP/1.1 200 OK\r\n"
-CREATED_STATUS = "HTTP/1.1 201 Created\r\n"
+CREATED_STATUS = "HTTP/1.1 201 Created\r\n\r\n"
 NOT_FOUND_STATUS = "HTTP/1.1 404 Not Found\r\n\r\n"
 CRLF = "\r\n"
 
