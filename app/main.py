@@ -1,8 +1,10 @@
 import socket
 import threading
+import os
 
 OK_STATUS = "HTTP/1.1 200 OK\r\n"
 NOT_FOUND_STATUS = "HTTP/1.1 404 Not Found\r\n\r\n"
+CRLF = "\r\n"
 
 def parse_headers(request):
     """
@@ -29,13 +31,25 @@ def handle_request(request):
         content_type = "Content-Type: text/plain\r\n"
         content_length = f"Content-Length: {len(path.split("/echo/")[1])}\r\n"
 
-        return OK_STATUS + content_type + content_length + "\r\n" + echo
+        return OK_STATUS + content_type + content_length + CRLF + echo
     elif path == "/user-agent":
         user_agent = parse_headers(request)["User-Agent"]
         content_type = "Content-Type: text/plain\r\n"
         content_length = f"Content-Length: {len(user_agent)}\r\n"
 
-        return OK_STATUS + content_type + content_length + "\r\n" + user_agent
+        return OK_STATUS + content_type + content_length + CRLF + user_agent
+    elif path.startswith("/files/"):
+        file_name = path.split("/files/")[1] or ""
+        try: 
+            with open(f"/tmp/{file_name}") as file:
+                file_content = file.read()
+        except FileNotFoundError:
+            return NOT_FOUND_STATUS
+        
+        content_length = f"Content-Length: {os.path.getsize(f'/tmp/{file_name}')}\r\n"
+        content_type = "Content-Type: application/octet-stream\r\n"
+
+        return OK_STATUS + content_type + content_length + CRLF + file_content
     else:
         return NOT_FOUND_STATUS
     
@@ -57,8 +71,8 @@ def main():
     print("Server is listening on port 4221")
     
     while True:
-        client_socken, client_address = server_socket.accept()
-        client_thread = threading.Thread(target=handle_client, args=(client_socken, client_address))
+        client_socket, client_address = server_socket.accept()
+        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
         client_thread.start()
 
 
