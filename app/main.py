@@ -1,10 +1,18 @@
 import socket
 import threading
 import os
+import argparse
 
 OK_STATUS = "HTTP/1.1 200 OK\r\n"
 NOT_FOUND_STATUS = "HTTP/1.1 404 Not Found\r\n\r\n"
 CRLF = "\r\n"
+
+arg_parser = argparse.ArgumentParser()
+arg_parser.add_argument("--directory", help="Directory to serve files from", default="./tmp/")
+
+args = arg_parser.parse_args()
+
+FILE_DIRECTORY = args.directory
 
 def parse_headers(request):
     """
@@ -46,7 +54,7 @@ def handle_request(request):
         return OK_STATUS + content_type + content_length + CRLF + user_agent
     elif path.startswith("/files/"):
         file_name = path.split("/files/")[1] or ""
-        file_path = os.path.join("/tmp/data/codecrafters.io/http-server-tester", file_name)
+        file_path = os.path.join(FILE_DIRECTORY, file_name)
 
         if not os.path.exists(file_path):
             return NOT_FOUND_STATUS
