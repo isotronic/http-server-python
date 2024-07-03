@@ -1,4 +1,5 @@
 import socket
+import threading
 
 OK_STATUS = "HTTP/1.1 200 OK\r\n"
 NOT_FOUND_STATUS = "HTTP/1.1 404 Not Found\r\n\r\n"
@@ -18,7 +19,7 @@ def parse_headers(request):
 
 def handle_request(request):
     """
-    Handle an HTTP request and generates an appropriate HTTP response based on the request path.
+    Handle an HTTP request and generate an appropriate HTTP response based on the request path.
     """
     path = request.split(" ")[1]
     if path == "/":
@@ -37,22 +38,28 @@ def handle_request(request):
         return OK_STATUS + content_type + content_length + "\r\n" + user_agent
     else:
         return NOT_FOUND_STATUS
+    
+def handle_client(client_socket, client_address):
+    print(f"Accepted connection from {client_address}")
+
+    
+    request = client_socket.recv(1024).decode("utf-8")
+    print(f"Received request: {request}")
+
+    response = handle_request(request)
+
+    client_socket.sendall(response.encode("utf-8"))
+    client_socket.close()
 
 
 def main():
     server_socket = socket.create_server(("localhost", 4221), reuse_port=False)
+    print("Server is listening on port 4221")
     
     while True:
-        client_socket, client_address = server_socket.accept()
-        print(f"Accepted connection from {client_address}")
-
-        request = client_socket.recv(1024).decode("utf-8")
-        print(f"Received request: {request}")
-
-        response = handle_request(request)
-
-        client_socket.sendall(response.encode("utf-8"))
-        client_socket.close()
+        client_socken, client_address = server_socket.accept()
+        client_thread = threading.Thread(target=handle_client, args=(client_socken, client_address))
+        client_thread.start()
 
 
 if __name__ == "__main__":
