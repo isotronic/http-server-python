@@ -27,9 +27,9 @@ def handle_request(request):
     if len(lines) == 0:
         return NOT_FOUND_STATUS
     
-    header = parse_headers(request)
+    headers = parse_headers(request)
 
-    method, path, _ = request.split(" ")
+    path = request.split(" ")[1]
     if path == "/":
         return OK_STATUS + "\r\n"
     elif path.startswith("/echo"):
@@ -39,7 +39,7 @@ def handle_request(request):
 
         return OK_STATUS + content_type + content_length + CRLF + echo
     elif path == "/user-agent":
-        user_agent = parse_headers(request)["User-Agent"]
+        user_agent = headers.get("User-Agent", "")
         content_type = "Content-Type: text/plain\r\n"
         content_length = f"Content-Length: {len(user_agent)}\r\n"
 
