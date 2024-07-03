@@ -23,11 +23,17 @@ def handle_request(request):
     """
     Handle an HTTP request and generate an appropriate HTTP response based on the request path.
     """
-    path = request.split(" ")[1]
+    lines = request.split("\r\n")
+    if len(lines) == 0:
+        return NOT_FOUND_STATUS
+    
+    header = parse_headers(request)
+
+    method, path, _ = request.split(" ")
     if path == "/":
         return OK_STATUS + "\r\n"
     elif path.startswith("/echo"):
-        (echo, ) = path.split("/echo/")[1:2] or ""
+        echo = path.split("/echo/")[1] if "/echo/" in path else ""
         content_type = "Content-Type: text/plain\r\n"
         content_length = f"Content-Length: {len(path.split("/echo/")[1])}\r\n"
 
@@ -41,6 +47,10 @@ def handle_request(request):
     elif path.startswith("/files/"):
         file_name = path.split("/files/")[1] or ""
         file_path = os.path.join("/tmp/data/codecrafters.io/http-server-tester", file_name)
+
+        if not os.path.exists(file_path):
+            return NOT_FOUND_STATUS
+        
         try: 
             with open(file_path) as file:
                 file_content = file.read()
@@ -57,14 +67,17 @@ def handle_request(request):
 def handle_client(client_socket, client_address):
     print(f"Accepted connection from {client_address}")
 
-    
-    request = client_socket.recv(1024).decode("utf-8")
-    print(f"Received request: {request}")
+    try:
+        request = client_socket.recv(1024).decode("utf-8")
+        print(f"Received request: {request}")
 
-    response = handle_request(request)
+        response = handle_request(request)
 
-    client_socket.sendall(response.encode("utf-8"))
-    client_socket.close()
+        client_socket.sendall(response.encode("utf-8"))
+    except Exception as e:
+        print(f"Error handling client: {e}")
+    finally:
+        client_socket.close()
 
 
 def main():
