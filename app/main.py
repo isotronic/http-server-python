@@ -47,7 +47,7 @@ def handle_request(request):
         except FileNotFoundError:
             return NOT_FOUND_STATUS
         
-        content_length = f"Content-Length: {os.path.getsize(f'/tmp/{file_name}')}\r\n"
+        content_length = f"Content-Length: {os.path.getsize(file_path)}\r\n"
         content_type = "Content-Type: application/octet-stream\r\n"
 
         return OK_STATUS + content_type + content_length + CRLF + file_content
