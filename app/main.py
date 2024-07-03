@@ -1,27 +1,45 @@
 import socket
 
+OK_STATUS = "HTTP/1.1 200 OK\r\n"
+NOT_FOUND_STATUS = "HTTP/1.1 404 Not Found\r\n\r\n"
+
+def parse_headers(request):
+    """
+    Parse the headers of an HTTP request.
+    """
+    headers = {}
+    lines = request.split("\r\n")
+    for line in lines[1:]:
+        if ":" in line:
+            key, value = line.split(": ", 1)
+            headers[key] = value
+    
+    return headers
+
 def handle_request(request):
     """
-    A function that handles an HTTP request and generates an appropriate HTTP response based on the request path.
-    This function takes the request as input and returns the corresponding HTTP response.
+    Handle an HTTP request and generates an appropriate HTTP response based on the request path.
     """
     path = request.split(" ")[1]
     if path == "/":
-        return "HTTP/1.1 200 OK\r\n\r\n"
+        return OK_STATUS + "\r\n"
     elif path.startswith("/echo"):
         (echo, ) = path.split("/echo/")[1:2] or ""
-        status = "HTTP/1.1 200 OK\r\n"
         content_type = "Content-Type: text/plain\r\n"
-        content_length = f"Content-Length: {len(path.split('/echo/')[1])}\r\n"
+        content_length = f"Content-Length: {len(path.split("/echo/")[1])}\r\n"
 
-        return status + content_type + content_length + "\r\n" + echo
+        return OK_STATUS + content_type + content_length + "\r\n" + echo
+    elif path == "/user-agent":
+        user_agent = parse_headers(request)["User-Agent"]
+        content_type = "Content-Type: text/plain\r\n"
+        content_length = f"Content-Length: {len(user_agent)}\r\n"
+
+        return OK_STATUS + content_type + content_length + "\r\n" + user_agent
     else:
-        return "HTTP/1.1 404 Not Found\r\n\r\n"
+        return NOT_FOUND_STATUS
 
 
 def main():
-    print("Logs from the program will appear here!")
-  
     server_socket = socket.create_server(("localhost", 4221), reuse_port=False)
     
     while True:
