@@ -4,11 +4,13 @@ import os
 import argparse
 import gzip
 
+# Constants
 OK_STATUS = "HTTP/1.1 200 OK\r\n"
 CREATED_STATUS = "HTTP/1.1 201 Created\r\n\r\n"
 NOT_FOUND_STATUS = "HTTP/1.1 404 Not Found\r\n\r\n"
 CRLF = "\r\n"
 
+# Setup Argument Parser
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--directory", help="Directory to serve files from", default="./files/")
 arg_parser.add_argument("--port", help="Port to listen on", default=4221)
@@ -30,7 +32,15 @@ def parse_headers(request):
 
 def build_response(status, headers, body):
     """
-    Build an HTTP response.
+    Builds an HTTP response based on the provided status, headers, and body.
+
+    Args:
+        status (str): The HTTP status code of the response.
+        headers (list): A list of HTTP headers to include in the response.
+        body (str or bytes): The content of the response.
+
+    Returns:
+        The HTTP response as a byte string or string.
     """
     response_headers = "".join(headers)
     if isinstance(body, str):
@@ -100,6 +110,19 @@ def handle_request(request):
         return build_response(NOT_FOUND_STATUS, [], "")
     
 def handle_client(client_socket, client_address):
+    """
+    Handle a client connection by receiving and processing an HTTP request.
+    
+    Args:
+        client_socket (socket.socket): The socket object representing the client connection.
+        client_address (tuple): A tuple containing the client's IP address and port number.
+    
+    Returns:
+        None
+    
+    Raises:
+        Exception: If an error occurs while handling the client request.
+    """
     print(f"Accepted connection from {client_address}")
     try:
         request = client_socket.recv(1024).decode("utf-8")
@@ -113,6 +136,9 @@ def handle_client(client_socket, client_address):
 
 
 def main():
+    """
+    Creates a server socket and listens for incoming client connections.
+    """
     server_socket = socket.create_server(("localhost", 4221), reuse_port=False)
     print("Server is listening on port 4221")
     
