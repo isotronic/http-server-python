@@ -1,15 +1,7 @@
 [![progress-banner](https://backend.codecrafters.io/progress/http-server/0276bb61-46ab-44ce-a1c3-023582f584a1)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
-This is a starting point for Python solutions to the
-["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
+This is my implementation of the ["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
 
-[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) is the
-protocol that powers the web. In this challenge, you'll build a HTTP/1.1 server
-that is capable of serving multiple clients.
+I built a very simple HTTP/1.1 server that can serve multiple clients concurrently with threading, handle gzip compression of the response body, read and process a select few request headers, save the contents of the request body to a file and also read a file and send the contents to the client in the response body.
 
-Along the way you'll learn about TCP servers,
-[HTTP request syntax](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html),
-and more.
-
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+**Note**: Head over to [codecrafters.io](https://codecrafters.io) to try the challenge yourself.
