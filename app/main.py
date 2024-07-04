@@ -4,6 +4,7 @@ import os
 import argparse
 import gzip
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 # Constants
 OK_STATUS = "HTTP/1.1 200 OK\r\n"
@@ -146,15 +147,13 @@ def main():
     server_socket = socket.create_server(("localhost", PORT), reuse_port=False)
     logging.info(f"Server is listening on port {PORT}")
     
-    while True:
-        try:
-            client_socket, client_address = server_socket.accept()
-            client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address), daemon=True)
-            client_thread.start()
-        except Exception as e:
-            logging.error(f"Error accepting connection: {e}")
-
-
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        while True:
+            try:
+                client_socket, client_address = server_socket.accept()
+                executor.submit(handle_client, client_socket, client_address)
+            except Exception as e:
+                logging.error(f"Error accepting connection: {e}")
 
 if __name__ == "__main__":
     main()
