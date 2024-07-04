@@ -10,11 +10,11 @@ NOT_FOUND_STATUS = "HTTP/1.1 404 Not Found\r\n\r\n"
 CRLF = "\r\n"
 
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--directory", help="Directory to serve files from", default="./tmp/")
-
+arg_parser.add_argument("--directory", help="Directory to serve files from", default="./files/")
+arg_parser.add_argument("--port", help="Port to listen on", default=4221)
 args = arg_parser.parse_args()
-
 FILE_DIRECTORY = args.directory
+PORT = args.port
 
 def parse_headers(request):
     """
@@ -95,13 +95,10 @@ def handle_request(request):
     
 def handle_client(client_socket, client_address):
     print(f"Accepted connection from {client_address}")
-
     try:
         request = client_socket.recv(1024).decode("utf-8")
         print(f"Received request: {request}")
-
         response = handle_request(request)
-
         client_socket.sendall(response)
     except Exception as e:
         print(f"Error handling client: {e}")
