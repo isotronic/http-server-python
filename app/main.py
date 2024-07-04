@@ -49,7 +49,7 @@ def handle_request(request):
         content_length = f"Content-Length: {len(path.split("/echo/")[1])}\r\n"
         content_encoding = ""
 
-        if (request_headers.get("Accept-Encoding", "")).startswith("gzip"):
+        if "gzip" in request_headers.get("Accept-Encoding", "").lower():
             content_encoding = "Content-Encoding: gzip\r\n"
 
         return OK_STATUS + content_encoding + content_type + content_length + CRLF + echo
@@ -61,7 +61,7 @@ def handle_request(request):
 
         return OK_STATUS + content_type + content_length + CRLF + user_agent
     
-    elif path.startswith("/files/"):
+    elif path.startswith("/files"):
         file_name = path.split("/files/")[1] or ""
         file_path = os.path.join(FILE_DIRECTORY, file_name)
 
